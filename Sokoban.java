@@ -9,28 +9,38 @@ public class Sokoban {
     
     
     
-    private char[][] grille = {
-
-    {'#', '#', '#', '#', '#', '#', '#', '#'},
-    {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-    {'#', ' ', ' ', '.', ' ', ' ', ' ', '#'},
-    {'#', ' ', ' ', '$', ' ', ' ', ' ', '#'},
-    {'#', ' ', ' ', '@', ' ', ' ', ' ', '#'},
-    {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-    {'#', '#', '#', '#', '#', '#', '#', '#'}
-    
+    private char[][][] niveaux = {
+        {
+            {'#', '#', '#', '#', '#', '#', '#', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', '.', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', '$', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', '@', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', '#', '#', '#', '#', '#', '#', '#'}
+        },
+        {
+            {'#', '#', '#', '#', '#', '#', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', ' ', '$', ' ', '$', ' ', '#'},
+            {'#', ' ', '.', '@', '.', ' ', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', '#', '#', '#', '#', '#', '#'}
+        },
+        {
+            {'#', '#', '#', '#', '#', '#', '#', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', ' ', '$', '.', '$', ' ', ' ', '#'},
+            {'#', ' ', ' ', '@', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', '.', ' ', ' ', ' ', '#'},
+            {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
+            {'#', '#', '#', '#', '#', '#', '#', '#'}
+        }
     };
 
-    private boolean[][] objectifs = {
-        {false, false, false, false, false, false, false, false},
-        {false, false, false, false, false, false, false, false},
-        {false, false, false, true, false, false, false, false},
-        {false, false, false, false, false, false, false, false},
-        {false, false, false, false, false, false, false, false},
-        {false, false, false, false, false, false, false, false},
-        {false, false, false, false, false, false, false, false}
-    };
-
+    private char[][] grille;
+    private boolean[][] objectifs;
+    private int numeroNiveau = 1;
     private int nombreMouvements = 0;
 
     public void afficherGrille() {
@@ -145,10 +155,62 @@ public class Sokoban {
     }
 
     public void chargerNiveau() {
+        char[][] source = niveaux[numeroNiveau - 1];
+        grille = new char[source.length][];
+        objectifs = new boolean[source.length][];
+
+        for (int ligne = 0; ligne < source.length; ligne++) {
+            grille[ligne] = new char[source[ligne].length];
+            objectifs[ligne] = new boolean[source[ligne].length];
+            for (int colonne = 0; colonne < source[ligne].length; colonne++) {
+                grille[ligne][colonne] = source[ligne][colonne];
+                objectifs[ligne][colonne] = source[ligne][colonne] == '.'
+                    || source[ligne][colonne] == '*';
+            }
+        }
+
+        nombreMouvements = 0;
+    }
+
+    public void afficherMenuNiveaux() {
+        System.out.println("===== SOKOBAN =====");
+        System.out.println("1. Niveau 1");
+        System.out.println("2. Niveau 2");
+        System.out.println("3. Niveau 3");
+        System.out.println("4. Quitter");
+        System.out.print("Votre choix : ");
     }
 
     public void jouer() {
         Scanner scanner = new Scanner(System.in);
+        boolean continuer = true;
+
+        while (continuer) {
+            afficherMenuNiveaux();
+            String saisie = scanner.nextLine();
+
+            if (saisie.length() == 0) {
+                continue;
+            }
+
+            char choix = saisie.charAt(0);
+
+            if (choix == '4') {
+                continuer = false;
+            } else if (choix == '1' || choix == '2' || choix == '3') {
+                numeroNiveau = choix - '0';
+                chargerNiveau();
+                jouerPartie(scanner);
+            } else {
+                System.out.println("Choix invalide.");
+            }
+        }
+
+        scanner.close();
+        System.out.println("Partie terminee.");
+    }
+
+    public void jouerPartie(Scanner scanner) {
         boolean partieEnCours = true;
 
         while (partieEnCours) {
@@ -176,11 +238,6 @@ public class Sokoban {
             } else {
                 deplacerJoueur(commande);
             }
-        }
-
-        scanner.close();
-        if (!partieTerminee()) {
-            System.out.println("Partie terminee.");
         }
     }
 
