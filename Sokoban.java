@@ -31,6 +31,8 @@ public class Sokoban {
         {false, false, false, false, false, false, false, false}
     };
 
+    private int nombreMouvements = 0;
+
     public void afficherGrille() {
         for (int ligne = 0; ligne < grille.length; ligne++) {
             for (int colonne = 0; colonne < grille[ligne].length; colonne++) {
@@ -92,12 +94,14 @@ public class Sokoban {
                 deplacerCaisse(nouvelleLigne, nouvelleColonne, caisseLigneApres, caisseColonneApres);
                 grille[joueurLigne][joueurColonne] = objectifs[joueurLigne][joueurColonne] ? '.' : ' ';
                 grille[nouvelleLigne][nouvelleColonne] = '@';
+                nombreMouvements++;
             } else {
                 System.out.println("Impossible de pousser la caisse.");
             }
         } else if (deplacementValide(nouvelleLigne, nouvelleColonne)) {
             grille[joueurLigne][joueurColonne] = objectifs[joueurLigne][joueurColonne] ? '.' : ' ';
             grille[nouvelleLigne][nouvelleColonne] = '@';
+            nombreMouvements++;
         } else {
             System.out.println("Deplacement impossible.");
         }
@@ -130,7 +134,14 @@ public class Sokoban {
     }
 
     public boolean partieTerminee() {
-        return false;
+        for (int ligne = 0; ligne < grille.length; ligne++) {
+            for (int colonne = 0; colonne < grille[ligne].length; colonne++) {
+                if (objectifs[ligne][colonne] && grille[ligne][colonne] != '*') {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void chargerNiveau() {
@@ -142,6 +153,13 @@ public class Sokoban {
 
         while (partieEnCours) {
             afficherGrille();
+
+            if (partieTerminee()) {
+                System.out.println("Victoire !");
+                System.out.println("Nombre de mouvements : " + nombreMouvements);
+                break;
+            }
+
             System.out.println("z: haut, s: bas, q: gauche, d: droite, x: quitter");
             System.out.print("Votre choix : ");
 
@@ -161,7 +179,9 @@ public class Sokoban {
         }
 
         scanner.close();
-        System.out.println("Partie terminee.");
+        if (!partieTerminee()) {
+            System.out.println("Partie terminee.");
+        }
     }
 
     public void resoudreDFS() {
